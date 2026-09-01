@@ -104,3 +104,10 @@ with tab3:
                     st.markdown(response.text)
             except Exception as e:
                 st.error(f"حدث خطأ: {e}")
+
+import streamlit as st
+
+st.set_page_config(page_title="Lexisynth - استوديو النصوص", page_icon="✍️", layout="centered")
+
+# كود إثبات الملكية لجوجل
+st.markdown(<meta name="google-site-verification" content="eDEfflmb_eJFg-lrhplE3RA_KA_rLP-Pgw0n4IMa0E8" />)
