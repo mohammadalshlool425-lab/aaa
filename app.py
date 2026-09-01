@@ -2,7 +2,14 @@ import streamlit as st
 import google.generativeai as genai
 
 st.set_page_config(page_title="استوديو النصوص الاحترافي", page_icon="✍️", layout="centered")
-
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # ⚠️ ضع مفتاح Gemini API الخاص بك هنا مباشرة ليعمل الموقع تلقائياً دون إزعاج المستخدمين
 API_KEY_DEFAULT = "ضع_مفتاحك_هنا"
 
