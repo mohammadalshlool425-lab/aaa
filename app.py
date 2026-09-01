@@ -3,25 +3,8 @@ import google.generativeai as genai
 
 st.set_page_config(page_title="استوديو النصوص الاحترافي", page_icon="✍️", layout="centered")
 
-# --- نظام تسجيل الدخول ---
-st.sidebar.title("🔐 تسجيل الدخول")
-st.sidebar.write("هذه الأداة مدفوعة للمشتركين فقط.")
-user_password = st.sidebar.text_input("أدخل كود الاشتراك الخاص بك:", type="password")
-
-valid_passwords = ["aboshalool_vip", "pro_user_2026", "freefire_king"]
-
-if user_password not in valid_passwords:
-    st.title("✍️ استوديو النصوص الاحترافي لصناع المحتوى")
-    st.warning("عذراً، يجب إدخال كود اشتراك صالح في القائمة الجانبية لاستخدام الأداة.")
-    st.info("للحصول على كود اشتراك، يمكنك زيارة متجرنا.")
-    st.stop()
-
-st.sidebar.success("تم التحقق بنجاح!")
-
-# --- مفتاح API ---
-st.sidebar.markdown("---")
-st.sidebar.write("⚙️ إعدادات الذكاء الاصطناعي")
-api_key = st.sidebar.text_input("🔑 أدخل مفتاح Gemini API الخاص بك:", type="password")
+# ⚠️ ضع مفتاح Gemini API الخاص بك هنا مباشرة ليعمل الموقع تلقائياً دون إزعاج المستخدمين
+API_KEY_DEFAULT = "ضع_مفتاحك_هنا"
 
 # --- تقسيم الموقع لأدوات نصية احترافية ---
 st.title("✍️ استوديو النصوص الاحترافي")
@@ -40,13 +23,11 @@ with tab1:
     idea = st.text_area("💡 ما هي فكرة المقطع؟", "مثال: لقطة قنص أسطورية في فري فاير ونهاية غير متوقعة")
     
     if st.button("🚀 كتابة السيناريو الاحترافي"):
-        if not api_key:
-            st.warning("يرجى إدخال مفتاح الـ API في القائمة الجانبية!")
-        elif not idea:
+        if not idea:
             st.warning("يرجى كتابة الفكرة!")
         else:
             try:
-                genai.configure(api_key=api_key.strip())
+                genai.configure(api_key=API_KEY_DEFAULT)
                 model = genai.GenerativeModel('gemini-3.6-flash')
                 prompt = f"""
                 أنت خبير في كتابة سيناريوهات الفيديوهات القصيرة سريعة الانتشار (Viral).
@@ -73,13 +54,11 @@ with tab2:
     title_idea = st.text_input("🎯 عن ماذا يتحدث المقطع؟", "مثال: تحدي ون شوت في لعبة باتل رويال")
     
     if st.button("💡 توليد 5 عناوين"):
-        if not api_key:
-            st.warning("يرجى إدخال مفتاح الـ API أولاً!")
-        elif not title_idea:
+        if not title_idea:
             st.warning("يرجى كتابة موضوع المقطع!")
         else:
             try:
-                genai.configure(api_key=api_key.strip())
+                genai.configure(api_key=API_KEY_DEFAULT)
                 model = genai.GenerativeModel('gemini-3.6-flash')
                 prompt = f"""
                 أنت خبير في التسويق وكتابة العناوين الجذابة (Clickbait) على يوتيوب وتيك توك.
@@ -98,13 +77,11 @@ with tab3:
     desc_idea = st.text_area("📝 اكتب فكرة الفيديو لاستخراج الكلمات المفتاحية:", "مثال: لقطات لعب قوية وتكتيكات للفوز للوصول لرانك عالي")
     
     if st.button("🔍 تجهيز الوصف والهاشتاجات"):
-        if not api_key:
-            st.warning("يرجى إدخال مفتاح الـ API!")
-        elif not desc_idea:
+        if not desc_idea:
             st.warning("يرجى كتابة الفكرة!")
         else:
             try:
-                genai.configure(api_key=api_key.strip())
+                genai.configure(api_key=API_KEY_DEFAULT)
                 model = genai.GenerativeModel('gemini-3.6-flash')
                 prompt = f"""
                 أنت خبير في خوارزميات البحث (SEO) للمنصات الاجتماعية.
