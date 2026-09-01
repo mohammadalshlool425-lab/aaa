@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+import urllib.parse
 import requests
 
 st.set_page_config(page_title="مهندس المقاطع الصامتة (النسخة الاحترافية)", page_icon="🎮", layout="centered")
@@ -19,9 +20,9 @@ if user_password not in valid_passwords:
 
 st.sidebar.success("تم التحقق بنجاح!")
 
-# --- تقسيم الموقع إلى قسمين (تبويبات) ---
+# --- تقسيم الموقع إلى 3 أقسام ---
 st.title("🎬 أدوات الإنتاج الاحترافية")
-tab1, tab2 = st.tabs(["📝 مهندس النصوص (السيناريو)", "🖼️ محسن الصور (4K/8K)"])
+tab1, tab2, tab3 = st.tabs(["📝 مهندس النصوص", "🎨 توليد الصور", "🔍 محسن الصور (مفتوح المصدر)"])
 
 # --- القسم الأول: مهندس النصوص ---
 with tab1:
@@ -40,12 +41,10 @@ with tab1:
                 model = genai.GenerativeModel('gemini-3.6-flash')
                 prompt = f"""
                 أنا صانع محتوى أنشر مقاطع قصيرة تعتمد على تسجيل الشاشة فقط بدون تعليق صوتي.
-                اكتب لي سيناريو للنصوص التي يجب إضافتها على الشاشة (Text Overlays) لهذه الفكرة: {idea}
-                
-                أريد التقسيم التالي:
-                1. 🪝 Hook: جملة افتتاحية قوية جداً لأول 3 ثوانٍ.
-                2. ⏱️ السيناريو: العبارات التي ستظهر على الشاشة بالترتيب مع التوقيت.
-                3. 📝 الوصف: وصف جذاب للمقطع مع هاشتاجات قوية للانتشار.
+                اكتب لي سيناريو للنصوص التي يجب إضافتها على الشاشة لهذه الفكرة: {idea}
+                1. 🪝 Hook: جملة افتتاحية قوية لأول 3 ثوانٍ.
+                2. ⏱️ السيناريو: العبارات التي ستظهر على الشاشة بالترتيب.
+                3. 📝 الوصف: وصف جذاب للمقطع مع هاشتاجات.
                 """
                 with st.spinner("جاري التخطيط وتوليد النصوص..."):
                     response = model.generate_content(prompt)
@@ -53,36 +52,59 @@ with tab1:
             except Exception as e:
                 st.error(f"حدث خطأ أثناء الاتصال: {e}")
 
-# --- القسم الثاني: محسن الصور ---
+# --- القسم الثاني: صانع الصور (بدون مفتاح) ---
 with tab2:
-    st.header("رفع دقة الصور المصغرة بالذكاء الاصطناعي")
-    st.write("قم برفع لقطة شاشة من اللعب، وسنقوم بتحسين جودتها لتصبح جاهزة كغلاف للمقطع.")
+    st.header("توليد صور غلاف بالذكاء الاصطناعي")
+    st.write("اكتب وصفاً، وسيقوم الذكاء الاصطناعي برسمه فوراً (مفتوح المصدر وبدون مفتاح).")
     
-    image_api_key = st.text_input("🔑 أدخل مفتاح DeepAI API الخاص بك:", type="password", key="deepai_key")
+    image_prompt = st.text_input("🎨 صف الصورة التي تريدها:", "مثال: شخصية مقاتل في لعبة نجاة، جودة 4K")
     
+    if st.button("✨ رسم الصورة الآن"):
+        if not image_prompt:
+            st.warning("يرجى كتابة وصف للصورة أولاً!")
+        else:
+            with st.spinner("جاري رسم الصورة..."):
+                try:
+                    safe_prompt = urllib.parse.quote(image_prompt)
+                    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1280&height=720&nologo=true"
+                    st.success("🎉 تم رسم الصورة بنجاح!")
+                    st.image(image_url, caption=image_prompt)
+                    st.markdown(f"[📥 اضغط هنا لتحميل الصورة]({image_url})")
+                except Exception as e:
+                    st.error(f"فشل الاتصال: {e}")
+
+# --- القسم الثالث: محسن الصور (Hugging Face) ---
+with tab3:
+    st.header("تحسين جودة الصور (Hugging Face)")
+    st.write("نستخدم النماذج المفتوحة المصدر لتحسين دقة الصور. ستحتاج إلى مفتاح Hugging Face المجاني.")
+    
+    hf_api_key = st.text_input("🔑 أدخل مفتاح Hugging Face الخاص بك:", type="password", key="hf_key")
     uploaded_file = st.file_uploader("📂 اختر صورة من جهازك", type=["jpg", "png", "jpeg"])
     
-    if st.button("✨ تحسين الصورة الآن"):
-        if not image_api_key:
-            st.warning("يرجى إدخال مفتاح الـ API الخاص بالصور أولاً!")
+    if st.button("✨ تحسين دقة الصورة"):
+        if not hf_api_key:
+            st.warning("يرجى إدخال مفتاح Hugging Face أولاً!")
         elif uploaded_file is None:
             st.warning("يرجى رفع صورة أولاً!")
         else:
-            with st.spinner("جاري تحليل تفاصيل الصورة ومعالجتها (قد يستغرق بضع ثوانٍ)..."):
+            with st.spinner("جاري معالجة الصورة (قد يستغرق الأمر بعض الوقت للنماذج المجانية)..."):
                 try:
-                    response = requests.post(
-                        "https://api.deepai.org/api/torch-srgan",
-                        files={'image': uploaded_file.getvalue()},
-                        headers={'api-key': image_api_key.strip()}
-                    )
-                    data = response.json()
+                    # استخدام نموذج مفتوح المصدر لتحسين الصور (Swin2SR)
+                    API_URL = "https://api-inference.huggingface.co/models/caidas/swin2SR-classical-sr-x2-64"
+                    headers = {"Authorization": f"Bearer {hf_api_key.strip()}"}
                     
-                    if 'output_url' in data:
+                    response = requests.post(API_URL, headers=headers, data=uploaded_file.getvalue())
+                    
+                    if response.status_code == 200:
                         st.success("🎉 تم تحسين الصورة بنجاح!")
-                        st.image(data['output_url'], caption="الصورة بالدقة العالية")
-                        st.markdown(f"[📥 اضغط هنا لتحميل الصورة بدقتها الكاملة]({data['output_url']})")
+                        st.image(response.content, caption="الصورة المحسنة")
+                        st.download_button(
+                            label="📥 تحميل الصورة المحسنة",
+                            data=response.content,
+                            file_name="upscaled_image.png",
+                            mime="image/png"
+                        )
                     else:
-                        st.error("حدث خطأ أثناء معالجة الصورة. تأكد من صلاحية المفتاح.")
-                        
+                        st.error("النموذج قيد التحميل حالياً (جاري تشغيله على الخادم المجاني)، يرجى المحاولة مرة أخرى بعد دقيقة.")
                 except Exception as e:
                     st.error(f"فشل الاتصال بالخادم: {e}")
