@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import urllib.parse
-import requests
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="مهندس المقاطع الصامتة (النسخة الاحترافية)", page_icon="🎮", layout="centered")
 
@@ -22,7 +22,7 @@ st.sidebar.success("تم التحقق بنجاح!")
 
 # --- تقسيم الموقع إلى 3 أقسام ---
 st.title("🎬 أدوات الإنتاج الاحترافية")
-tab1, tab2, tab3 = st.tabs(["📝 مهندس النصوص", "🎨 توليد الصور", "🔍 محسن الصور (مفتوح المصدر)"])
+tab1, tab2, tab3 = st.tabs(["📝 مهندس النصوص", "🎨 توليد الصور", "🔍 محسن الصور (المدمج)"])
 
 # --- القسم الأول: مهندس النصوص ---
 with tab1:
@@ -73,38 +73,10 @@ with tab2:
                 except Exception as e:
                     st.error(f"فشل الاتصال: {e}")
 
-# --- القسم الثالث: محسن الصور (Hugging Face) ---
+# --- القسم الثالث: محسن الصور المدمج (بدون مفتاح) ---
 with tab3:
-    st.header("تحسين جودة الصور (Hugging Face)")
-    st.write("نستخدم النماذج المفتوحة المصدر لتحسين دقة الصور. ستحتاج إلى مفتاح Hugging Face المجاني.")
+    st.header("تحسين جودة الصور (4K و 8K)")
+    st.write("لتجاوز مشكلة الخوادم المجانية، قمنا بدمج أداة التحسين مباشرة داخل موقعك لتعمل من متصفحك. **لا تحتاج لأي مفتاح API هنا!**")
     
-    hf_api_key = st.text_input("🔑 أدخل مفتاح Hugging Face الخاص بك:", type="password", key="hf_key")
-    uploaded_file = st.file_uploader("📂 اختر صورة من جهازك", type=["jpg", "png", "jpeg"])
-    
-    if st.button("✨ تحسين دقة الصورة"):
-        if not hf_api_key:
-            st.warning("يرجى إدخال مفتاح Hugging Face أولاً!")
-        elif uploaded_file is None:
-            st.warning("يرجى رفع صورة أولاً!")
-        else:
-            with st.spinner("جاري معالجة الصورة (قد يستغرق الأمر بعض الوقت للنماذج المجانية)..."):
-                try:
-                    # استخدام نموذج مفتوح المصدر لتحسين الصور (Swin2SR)
-                    API_URL = "https://api-inference.huggingface.co/models/caidas/swin2SR-classical-sr-x2-64"
-                    headers = {"Authorization": f"Bearer {hf_api_key.strip()}"}
-                    
-                    response = requests.post(API_URL, headers=headers, data=uploaded_file.getvalue())
-                    
-                    if response.status_code == 200:
-                        st.success("🎉 تم تحسين الصورة بنجاح!")
-                        st.image(response.content, caption="الصورة المحسنة")
-                        st.download_button(
-                            label="📥 تحميل الصورة المحسنة",
-                            data=response.content,
-                            file_name="upscaled_image.png",
-                            mime="image/png"
-                        )
-                    else:
-                        st.error("النموذج قيد التحميل حالياً (جاري تشغيله على الخادم المجاني)، يرجى المحاولة مرة أخرى بعد دقيقة.")
-                except Exception as e:
-                    st.error(f"فشل الاتصال بالخادم: {e}")
+    # نافذة مدمجة تعمل مباشرة داخل الموقع
+    components.iframe("https://huggingface.co/spaces/sczhou/CodeFormer?embed=true", height=850, scrolling=True)
