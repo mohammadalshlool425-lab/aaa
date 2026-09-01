@@ -1,6 +1,5 @@
 import streamlit as st
 import google.generativeai as genai
-import urllib.parse
 
 st.set_page_config(page_title="مهندس المقاطع الصامتة (النسخة الاحترافية)", page_icon="🎮", layout="centered")
 
@@ -19,19 +18,23 @@ if user_password not in valid_passwords:
 
 st.sidebar.success("تم التحقق بنجاح!")
 
-# --- تقسيم الموقع إلى 3 أقسام ---
+# --- تحسين ذكي: مفتاح API واحد يُشغّل الموقع بالكامل ---
+st.sidebar.markdown("---")
+st.sidebar.write("⚙️ إعدادات الذكاء الاصطناعي")
+api_key = st.sidebar.text_input("🔑 أدخل مفتاح Gemini API الخاص بك:", type="password")
+
+# --- تقسيم الموقع ---
 st.title("🎬 أدوات الإنتاج الاحترافية")
-tab1, tab2, tab3 = st.tabs(["📝 مهندس النصوص", "🎨 توليد الصور", "🔍 البوابة الذكية للصور"])
+tab1, tab2, tab3 = st.tabs(["📝 مهندس النصوص", "🎨 توليد الصور (Google)", "🔍 البوابة الذكية للصور"])
 
 # --- القسم الأول: مهندس النصوص ---
 with tab1:
     st.header("توليد سيناريوهات المقاطع")
-    api_key = st.text_input("🔑 أدخل مفتاح Gemini API الخاص بك:", type="password", key="gemini_key")
     idea = st.text_area("💡 ما هي فكرة المقطع الذي سجلته؟", "مثال: لقطة قنص أسطورية مع حركة سريعة")
     
     if st.button("🚀 توليد خطة المقطع"):
         if not api_key:
-            st.warning("يرجى إدخال مفتاح الـ API أولاً!")
+            st.warning("يرجى إدخال مفتاح الـ API في القائمة الجانبية أولاً!")
         elif not idea:
             st.warning("يرجى كتابة فكرة المقطع!")
         else:
@@ -51,32 +54,44 @@ with tab1:
             except Exception as e:
                 st.error(f"حدث خطأ أثناء الاتصال: {e}")
 
-# --- القسم الثاني: صانع الصور (بدون مفتاح) ---
+# --- القسم الثاني: صانع الصور (Imagen من Google) ---
 with tab2:
-    st.header("توليد صور غلاف بالذكاء الاصطناعي")
-    st.write("اكتب وصفاً، وسيقوم الذكاء الاصطناعي برسمه فوراً (بدون الحاجة لمفتاح).")
+    st.header("توليد صور غلاف احترافية (Google Imagen 3)")
+    st.write("استخدمنا نماذج جوجل الرسمية للصور لتوليد أغلفة بمقاس اليوتيوب (16:9) باستخدام نفس مفتاح Gemini.")
     
-    image_prompt = st.text_input("🎨 صف الصورة التي تريدها:", "مثال: شخصية مقاتل في ساحة المعركة، جودة 4K")
+    image_prompt = st.text_input("🎨 صف الصورة التي تريدها:", "مثال: شخصية مقاتل في ساحة المعركة، إضاءة سينمائية، جودة عالية")
     
-    if st.button("✨ رسم الصورة الآن"):
-        if not image_prompt:
+    if st.button("✨ رسم الصورة عبر Google"):
+        if not api_key:
+            st.warning("يرجى إدخال مفتاح الـ API في القائمة الجانبية أولاً!")
+        elif not image_prompt:
             st.warning("يرجى كتابة وصف للصورة أولاً!")
         else:
-            with st.spinner("جاري رسم الصورة..."):
+            with st.spinner("جاري رسم الصورة عبر خوادم جوجل..."):
                 try:
-                    safe_prompt = urllib.parse.quote(image_prompt)
-                    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=1280&height=720&nologo=true"
+                    genai.configure(api_key=api_key.strip())
+                    # استخدام نموذج الصور الرسمي من جوجل
+                    image_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
+                    
+                    result = image_model.generate_images(
+                        prompt=image_prompt,
+                        number_of_images=1,
+                        aspect_ratio="16:9" # مقاس مثالي لليوتيوب والشاشات
+                    )
+                    
                     st.success("🎉 تم رسم الصورة بنجاح!")
-                    st.image(image_url, caption=image_prompt)
-                    st.markdown(f"[📥 اضغط هنا لتحميل الصورة]({image_url})")
+                    
+                    for generated_image in result.images:
+                        st.image(generated_image.image, caption=image_prompt)
+                        
                 except Exception as e:
-                    st.error(f"فشل الاتصال: {e}")
+                    st.error(f"حدث خطأ أثناء الرسم: {e}")
+                    st.info("ملاحظة: إذا ظهر لك خطأ هنا، فقد تكون ميزة توليد الصور غير مفعلة بعد في حسابك على Google AI Studio للمنطقة التي تتواجد بها.")
 
-# --- القسم الثالث: البوابة الذكية (الحل النهائي) ---
+# --- القسم الثالث: البوابة الذكية للصور ---
 with tab3:
     st.header("تحسين جودة الصور إلى 4K و 8K")
-    st.write("لتجاوز قيود الخوادم العالمية وحمايتها، صممنا هذه البوابة السريعة. اضغط على أي أداة بالأسفل لفتحها فوراً وتحسين صورك مجاناً وبدون تعقيد.")
-    
+    st.write("البوابة السريعة لأدوات تحسين جودة الصور المفتوحة المصدر.")
     st.info("💡 اختر الأداة التي تناسبك:")
     
     col1, col2 = st.columns(2)
