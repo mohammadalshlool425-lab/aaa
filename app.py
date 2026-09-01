@@ -25,37 +25,24 @@ if st.button("🚀 توليد خطة المقطع"):
             # ربط الكود بـ API
             genai.configure(api_key=api_key.strip())
             
-            # البحث التلقائي عن النموذج المتوفر والمناسب لحسابك تلقائياً
-            available_models = [
-                m.name for m in genai.list_models() 
-                if 'generateContent' in m.supported_generation_methods
-            ]
+            # استخدام النموذج الأحدث المطلوب من الخادم مباشرة
+            model = genai.GenerativeModel('gemini-3.6-flash')
             
-            if not available_models:
-                st.error("لم يتم العثور على نماذج تدعم توليد النصوص في هذا المفتاح.")
-            else:
-                # اختيار أول نموذج مدعوم تلقائياً (مثل flash أو 2.0 أو 1.5)
-                chosen_model_name = next(
-                    (m for m in available_models if "flash" in m), 
-                    available_models[0]
-                )
-                model = genai.GenerativeModel(chosen_model_name)
+            # نص الطلب
+            prompt = f"""
+            أنا صانع محتوى أنشر مقاطع قصيرة تعتمد على تسجيل الشاشة فقط بدون تعليق صوتي.
+            اكتب لي سيناريو للنصوص التي يجب إضافتها على الشاشة (Text Overlays) لهذه الفكرة: {idea}
+            
+            أريد التقسيم التالي:
+            1. 🪝 Hook: جملة افتتاحية قوية جداً لأول 3 ثوانٍ.
+            2. ⏱️ السيناريو: العبارات التي ستظهر على الشاشة بالترتيب مع التوقيت.
+            3. 📝 الوصف: وصف جذاب للمقطع مع هاشتاجات قوية للانتشار.
+            """
+            
+            with st.spinner("جاري التخطيط وتوليد النصوص..."):
+                response = model.generate_content(prompt)
+                st.success("تم توليد خطة المقطع بنجاح!")
+                st.markdown(response.text)
                 
-                # نص الطلب
-                prompt = f"""
-                أنا صانع محتوى أنشر مقاطع قصيرة تعتمد على تسجيل الشاشة فقط بدون تعليق صوتي.
-                اكتب لي سيناريو للنصوص التي يجب إضافتها على الشاشة (Text Overlays) لهذه الفكرة: {idea}
-                
-                أريد التقسيم التالي:
-                1. 🪝 Hook: جملة افتتاحية قوية جداً لأول 3 ثوانٍ.
-                2. ⏱️ السيناريو: العبارات التي ستظهر على الشاشة بالترتيب مع التوقيت.
-                3. 📝 الوصف: وصف جذاب للمقطع مع هاشتاجات قوية للانتشار.
-                """
-                
-                with st.spinner(f"جاري التوليد باستخدام ({chosen_model_name})..."):
-                    response = model.generate_content(prompt)
-                    st.success("تم توليد خطة المقطع بنجاح!")
-                    st.markdown(response.text)
-                    
         except Exception as e:
             st.error(f"حدث خطأ أثناء الاتصال: {e}")
