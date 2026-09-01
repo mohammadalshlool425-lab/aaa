@@ -58,15 +58,42 @@ with tab2:
     st.header("رفع دقة الصور المصغرة بالذكاء الاصطناعي")
     st.write("قم برفع لقطة شاشة من اللعب، وسنقوم بتحسين جودتها لتصبح جاهزة كغلاف للمقطع.")
     
+    # مفتاح API الخاص بالصور
+    image_api_key = st.text_input("🔑 أدخل مفتاح DeepAI API الخاص بك:", type="password")
+    
     uploaded_file = st.file_uploader("📂 اختر صورة من جهازك", type=["jpg", "png", "jpeg"])
-    resolution = st.radio("اختر الدقة المطلوبة:", ["4K Ultra HD", "8K Extreme Detail"])
+    
+    import requests # مكتبة الاتصال بالخوادم
     
     if st.button("✨ تحسين الصورة الآن"):
-        if uploaded_file is None:
+        if not image_api_key:
+            st.warning("يرجى إدخال مفتاح الـ API الخاص بالصور أولاً!")
+        elif uploaded_file is None:
             st.warning("يرجى رفع صورة أولاً!")
         else:
-            # هنا قمنا ببناء الواجهة التفاعلية بالكامل
-            # ملاحظة: سنحتاج لاحقاً لربط هذا الزر بـ API متخصص بالصور (مثل Replicate)
-            with st.spinner("جاري تحليل تفاصيل الصورة ومعالجتها..."):
-                time.sleep(3) # محاكاة لعملية التحميل
+            with st.spinner("جاري تحليل تفاصيل الصورة ومعالجتها (قد يستغرق بضع ثوانٍ)..."):
+                try:
+                    # إرسال الصورة لخوادم DeepAI لتحسين الدقة
+                    response = requests.post(
+                        "https://api.deepai.org/api/torch-srgan",
+                        files={
+                            'image': uploaded_file.getvalue(),
+                        },
+                        headers={'api-key': image_api_key.strip()}
+                    )
+                    
+                    data = response.json()
+                    
+                    if 'output_url' in data:
+                        st.success("🎉 تم تحسين الصورة بنجاح!")
+                        # عرض الصورة المحسنة
+                        st.image(data['output_url'], caption="الصورة بالدقة العالية")
+                        
+                        # زر تحميل الصورة
+                        st.markdown(f"[📥 اضغط هنا لتحميل الصورة بدقتها الكاملة]({data['output_url']})")
+                    else:
+                        st.error("حدث خطأ أثناء معالجة الصورة. تأكد من صلاحية المفتاح.")
+                        
+                except Exception as e:
+                    st.error(f"فشل الاتصال بالخادم: {e}")محاكاة لعملية التحميل
                 st.info("الواجهة جاهزة وتعمل بنجاح! لكي يتم تحسين الصورة فعلياً وإرجاعها للمستخدم، نحتاج إلى دمج API خاص بمعالجة الصور في الخطوة القادمة.")
