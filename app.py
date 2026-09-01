@@ -1,6 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
-
+st.markdown(<meta name="google-site-verification" content="eDEfflmb_eJFg-lrhplE3RA_KA_rLP-Pgw0n4IMa0E8" />)
 st.set_page_config(page_title="استوديو النصوص الاحترافي", page_icon="✍️", layout="centered")
 st.markdown(<meta name="google-site-verification" content="eDEfflmb_eJFg-lrhplE3RA_KA_rLP-Pgw0n4IMa0E8" />)
 hide_streamlit_style = """
