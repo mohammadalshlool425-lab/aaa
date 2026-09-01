@@ -24,7 +24,7 @@ if st.button("🚀 توليد خطة المقطع"):
         try:
             # ربط الكود بخوادم Google Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+           model = genai.GenerativeModel('gemini-1.5-flash')
             
             # الأوامر الخفية التي يتم إرسالها للذكاء الاصطناعي (Prompt)
             prompt = f"""
